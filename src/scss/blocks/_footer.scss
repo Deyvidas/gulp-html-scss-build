@@ -1,0 +1,16 @@
+@import '../base/sticky-footer';
+
+.footer {
+    background-color: #3e3e3e;
+    padding: 50px 0;
+    font-size: 32px;
+    color: #fff;
+
+    h1 {
+        font-size: 32px;
+    }
+
+    @media (max-width: 1200px) {
+        font-size: 26px;
+    }
+}
