@@ -1,1 +1,1 @@
-import{sayHello}from"./modules/sayHello.js";console.log(sayHello());
+import{MobileNav}from"./modules/mobile-nav.js";MobileNav();

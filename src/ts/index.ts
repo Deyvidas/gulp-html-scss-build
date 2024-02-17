@@ -1,4 +1,3 @@
-import { sayHello } from './modules/sayHello.js';
-
-// Call function and output result in console.
-console.log(sayHello());
+// Handle interactions with the menu button.
+import { MobileNav } from './modules/mobile-nav.js';
+MobileNav();
