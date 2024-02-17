@@ -76,11 +76,11 @@ GulpClient.task('sassCompile', () => {
         .pipe(changed(dest, { hasChanged: compareContents }))
         .pipe(gulpPlumber(plumberConfig))
         .pipe(sassGlob())
-        .pipe(sassCompiler({ outputStyle: 'expanded', indentWidth: 4 }))
-        .pipe(autoPrefixer({ cascade: false })); // in time build add prefixes to new or experimental prop
+        .pipe(sassCompiler({ outputStyle: 'expanded', indentWidth: 4 }));
 
     if (isProd) {
         gulp = gulp
+            .pipe(autoPrefixer({ cascade: false })) // in time build add prefixes to new or experimental prop
             .pipe(webpCss())
             .pipe(groupMedia())
             .pipe(sassCompiler({ outputStyle: 'compressed' }));
