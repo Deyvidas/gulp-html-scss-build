@@ -28,6 +28,10 @@ import groupMedia from 'gulp-group-css-media-queries';
 import gulpSass from 'gulp-sass';
 import sassGlob from 'gulp-sass-glob';
 
+// TS
+import compile from 'gulp-typescript';
+import minify from 'gulp-minify';
+
 dotenv.config();
 
 const mode = process.env.MODE;
@@ -35,7 +39,7 @@ const isDev = mode === 'development';
 const isProd = mode === 'production';
 
 const rootDir = './src';
-const destDir = isDev ? './build' : isProd ? './dist' : './build';
+const destDir = isDev ? './build' : isProd ? './docs' : './build';
 
 const sassCompiler = gulpSass(dartSass);
 const plumberConfig = { errorHandler: notify.onError() };
@@ -123,12 +127,40 @@ GulpClient.task('cleanDist', (done) => {
 });
 
 /**
+ * Compile all TypeScript files into a JavaScript files.
+ */
+const tsCompileConfig = {
+    noImplicitAny: true,
+    outDir: 'index.js',
+    target: 'es2015',
+    module: 'esnext',
+    moduleResolution: 'node',
+    noEmitOnError: true,
+};
+GulpClient.task('compileTS', () => {
+    const source = `${rootDir}/ts/**/*.ts`;
+    const dest = `${destDir}/js/`;
+
+    var gulp = GulpClient.src(source)
+        .pipe(changed(dest, { hasChanged: compareContents }))
+        .pipe(gulpPlumber(plumberConfig))
+        .pipe(compile(tsCompileConfig));
+
+    if (isProd) {
+        gulp = gulp.pipe(minify({ noSource: true, ext: { src: '-min.js', min: '.js' } }));
+    }
+
+    return gulp.pipe(GulpClient.dest(dest));
+});
+
+/**
  * Execute the necessary action after saving the specified file.
  */
 GulpClient.task('watch', () => {
     GulpClient.watch(`${rootDir}/scss/**/*.scss`, GulpClient.parallel('sassCompile'));
     GulpClient.watch(`${rootDir}/**/*.html`, GulpClient.parallel('includeFiles'));
     GulpClient.watch(`${rootDir}/media/**/*`, GulpClient.parallel('copyMedia'));
+    GulpClient.watch(`${rootDir}/ts/**/*.ts`, GulpClient.parallel('compileTS'));
 });
 
 /**
@@ -136,6 +168,6 @@ GulpClient.task('watch', () => {
  */
 GulpClient.task('default', GulpClient.series(
     'cleanDist',
-    GulpClient.parallel('includeFiles', 'sassCompile', 'copyMedia'),
+    GulpClient.parallel('includeFiles', 'sassCompile', 'copyMedia', 'compileTS'),
     GulpClient.parallel('watch'),
 )); // prettier-ignore
