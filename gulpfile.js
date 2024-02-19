@@ -29,8 +29,8 @@ import gulpSass from 'gulp-sass';
 import sassGlob from 'gulp-sass-glob';
 
 // TS
-import compile from 'gulp-typescript';
-import minify from 'gulp-minify';
+import webpackConf from './webpack.config.js';
+import webpack from 'webpack-stream';
 
 dotenv.config();
 
@@ -129,14 +129,6 @@ GulpClient.task('cleanDist', (done) => {
 /**
  * Compile all TypeScript files into a JavaScript files.
  */
-const tsCompileConfig = {
-    noImplicitAny: true,
-    outDir: 'index.js',
-    target: 'es2015',
-    module: 'esnext',
-    moduleResolution: 'node',
-    noEmitOnError: true,
-};
 GulpClient.task('compileTS', () => {
     const source = `${rootDir}/ts/**/*.ts`;
     const dest = `${destDir}/js/`;
@@ -144,11 +136,7 @@ GulpClient.task('compileTS', () => {
     var gulp = GulpClient.src(source)
         .pipe(changed(dest, { hasChanged: compareContents }))
         .pipe(gulpPlumber(plumberConfig))
-        .pipe(compile(tsCompileConfig));
-
-    if (isProd) {
-        gulp = gulp.pipe(minify({ noSource: true, ext: { src: '-min.js', min: '.js' } }));
-    }
+        .pipe(webpack(webpackConf));
 
     return gulp.pipe(GulpClient.dest(dest));
 });

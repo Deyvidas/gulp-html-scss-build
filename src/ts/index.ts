@@ -1,3 +1,3 @@
 // Handle interactions with the menu button.
-import { MobileNav } from './modules/mobile-nav.js';
+import { MobileNav } from './modules/mobile-nav';
 MobileNav();

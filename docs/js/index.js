@@ -1,1 +1,0 @@
-import{MobileNav}from"./modules/mobile-nav.js";MobileNav();
