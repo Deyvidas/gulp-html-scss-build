@@ -44,11 +44,20 @@ const destDir = isDev ? './build' : isProd ? './docs' : './build';
 const sassCompiler = gulpSass(dartSass);
 const plumberConfig = { errorHandler: notify.onError() };
 
+const tasks = {
+    includeFiles: `(${mode.toUpperCase()}) | includeFiles`,
+    sassCompile: `(${mode.toUpperCase()}) | sassCompile`,
+    copyMedia: `(${mode.toUpperCase()}) | copyMedia`,
+    cleanDist: `(${mode.toUpperCase()}) | cleanDist`,
+    compileTS: `(${mode.toUpperCase()}) | compileTS`,
+    watch: `(${mode.toUpperCase()}) | watch`,
+};
+
 /**
  * Substitute @@include('./some/path/file.html') with the HTML code that is present in
  * this file.
  */
-GulpClient.task('includeFiles', () => {
+GulpClient.task(tasks.includeFiles, () => {
     const source = `${rootDir}/html/*.html`;
     const dest = `${destDir}/`;
 
@@ -72,7 +81,7 @@ GulpClient.task('includeFiles', () => {
  * Produces one .css file by combining all .scss files and storing it in the dist
  * directory.
  */
-GulpClient.task('sassCompile', () => {
+GulpClient.task(tasks.sassCompile, () => {
     const source = `${rootDir}/scss/*.scss`;
     const dest = `${destDir}/css/`;
 
@@ -97,7 +106,7 @@ GulpClient.task('sassCompile', () => {
  * Generate copies of all media files and the structure in the dist directory, and
  * decrease the weight of any pictures or icons.
  */
-GulpClient.task('copyMedia', () => {
+GulpClient.task(tasks.copyMedia, () => {
     const source = `${rootDir}/media/**/*`;
     const dest = `${destDir}/media/`;
 
@@ -119,7 +128,7 @@ GulpClient.task('copyMedia', () => {
 /**
  * Delete directory dist.
  */
-GulpClient.task('cleanDist', (done) => {
+GulpClient.task(tasks.cleanDist, (done) => {
     if (!fileSystem.existsSync(`${destDir}`)) return done();
 
     return GulpClient.src(`${destDir}`, { read: false })
@@ -129,7 +138,7 @@ GulpClient.task('cleanDist', (done) => {
 /**
  * Compile all TypeScript files into a JavaScript files.
  */
-GulpClient.task('compileTS', () => {
+GulpClient.task(tasks.compileTS, () => {
     const source = `${rootDir}/ts/**/*.ts`;
     const dest = `${destDir}/js/`;
 
@@ -144,18 +153,23 @@ GulpClient.task('compileTS', () => {
 /**
  * Execute the necessary action after saving the specified file.
  */
-GulpClient.task('watch', () => {
-    GulpClient.watch(`${rootDir}/scss/**/*.scss`, GulpClient.parallel('sassCompile'));
-    GulpClient.watch(`${rootDir}/**/*.html`, GulpClient.parallel('includeFiles'));
-    GulpClient.watch(`${rootDir}/media/**/*`, GulpClient.parallel('copyMedia'));
-    GulpClient.watch(`${rootDir}/ts/**/*.ts`, GulpClient.parallel('compileTS'));
+GulpClient.task(tasks.watch, () => {
+    GulpClient.watch(`${rootDir}/scss/**/*.scss`, GulpClient.parallel(tasks.sassCompile));
+    GulpClient.watch(`${rootDir}/**/*.html`, GulpClient.parallel(tasks.includeFiles));
+    GulpClient.watch(`${rootDir}/media/**/*`, GulpClient.parallel(tasks.copyMedia));
+    GulpClient.watch(`${rootDir}/ts/**/*.ts`, GulpClient.parallel(tasks.compileTS));
 });
 
 /**
  * Run the required action when entering the `gulp` command in the command line.
  */
 GulpClient.task('default', GulpClient.series(
-    'cleanDist',
-    GulpClient.parallel('includeFiles', 'sassCompile', 'copyMedia', 'compileTS'),
-    GulpClient.parallel('watch'),
+    tasks.cleanDist,
+    GulpClient.parallel(
+        tasks.includeFiles,
+        tasks.sassCompile,
+        tasks.copyMedia,
+        tasks.compileTS
+    ),
+    GulpClient.parallel(tasks.watch),
 )); // prettier-ignore
