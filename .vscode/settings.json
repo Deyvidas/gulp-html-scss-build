@@ -38,6 +38,5 @@
     "editor.rulers": [90]
   },
 
-  "cSpell.words": ["basepath", "csso", "fileinclude", "htmlmin", "webp"],
-  "liveServer.settings.port": 8001
+  "cSpell.words": ["basepath", "csso", "fileinclude", "htmlmin", "webp"]
 }
